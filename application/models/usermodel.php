@@ -33,4 +33,14 @@ class UserModel extends CI_Model {
       return null;
     }
   }
+
+  public function getUserByAccount($account){
+    $query = $this->db->get_where("user", Array("account" => $account, "password"));
+
+    if ($query->num_rows() > 0){
+      return $query->row();
+    }else{
+      return null;
+    }
+  }
 }

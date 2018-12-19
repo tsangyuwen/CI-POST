@@ -12,7 +12,18 @@ class TextModel extends CI_Model {
       "Views" => 0,
     ));     
     return $this->db->insert_id() ;
-  }    
+  }
+
+  function getTextByUserID($userID){
+    $this->db->select("article.*,user.Account");
+    $this->db->from('article');
+    $this->db->join('user', 'article.author = user.userID', 'left');
+    $this->db->where(Array("author" => $userID));
+    $this->db->order_by("ArticleID","desc");
+    $query = $this->db->get();
+
+    return $query->result();
+  }
 
    function get($articleID){
     //CI 裡面跨資料表結合的寫法

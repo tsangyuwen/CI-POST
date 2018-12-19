@@ -1,16 +1,40 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 class Text extends CI_Controller {
-  public function author(){
-    $this->load->view('author');
+  public function author($author = null){
+    if($author == null){
+      show_404("author not found!");
+      return true;
+    }
+
+    $this->load->model("UserModel");
+    $this->load->model("TextModel");
+
+    $user = $this->UserModel->getUserByAccount($author);
+    if($user == null){
+      show_404("Author not found !");
+    }
+
+    $results = $this->TextModel->getTextByUserID($user->UserID);
+
+    $this->load->view('author', Array(
+        "pageTitle" => $user->Account." POST",
+        "results" => $results,
+        "user" => $user,
+      )
+    );
   }
 
   public function post(){
+    $this->load->view('post');
+  }
+
+  public function create(){
     if(isset($_SESSION["user"])){
       redirect(site_url("/user/login"));
       return true;
     }
 
-    $this->load->view('post', Array(
+    $this->load->view('create', Array(
       "pageTitle" => "POST"
     )); 
   }
@@ -25,7 +49,7 @@ class Text extends CI_Controller {
     $content= trim($this->input->post("content"));
     
     if($title == "" || $content == ""){
-      $this->load->view('post',Array(
+      $this->load->view('create',Array(
         "pageTitle" => "POST",
         "errorMessage" => "Title or Content shouldn't be empty,please check!",
         "title" => $title,
@@ -38,39 +62,10 @@ class Text extends CI_Controller {
     session_start();
     $insertID = $this->TextModel->insert($_SESSION["user"]->UserID, $title, $content); 
     redirect(site_url("text/author"));
-  } 
-
-  public function postSuccess($articleID){
-    $this->load->view('article_success',Array(
-        "pageTitle" => "發文系統 - 文章發表成功",
-        "articleID" => $articleID
-    ));
   }
 
   public function edit(){
     $this->load->view('edit');  
-  }
-
-  public function view($articleID = null){
-    if($articleID == null){
-      show_404("Post not found !");
-      return true;
-    }
-
-    $this->load->model("PostModel");
-    //完成取資料動作
-    $article = $this->ArticleModel->get($articleID); 
-
-    if($article == null){
-      show_404("Post not found !");
-      return true;  
-    }
-
-    $this->load->view('view',Array(
-      //設定網頁標題
-      "pageTitle" => "發文系統 - 文章 [".$article->Title."] ", 
-      "article" => $article
-    ));
   }
 
 }
