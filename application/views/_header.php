@@ -10,4 +10,4 @@
   ?></title>
     <link rel="stylesheet" href="<?=base_url("/css/bootstrap.min.css")?>">
     <link rel="stylesheet" href="<?=base_url("/css/bootstrap-responsive.min.css")?>">
-    <link rel="stylesheet" href="<?=base_url("/assets/style.css")?>">
+    <link rel="stylesheet" href="<?=base_url("/assets/styles.css")?>">

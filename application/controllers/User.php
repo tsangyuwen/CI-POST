@@ -40,7 +40,6 @@ class User extends CI_Controller {
   }
 
   public function login(){
-    session_start();
     if(isset($_SESSION["user"]) && $_SESSION["user"] != null){
       redirect(site_url("/"));
       return true;
@@ -53,7 +52,6 @@ class User extends CI_Controller {
   }
 
   public function logining(){
-    session_start();
     if(isset($_SESSION["user"]) && $_SESSION["user"] != null){
       redirect(site_url("/"));
       return true;
@@ -79,7 +77,6 @@ class User extends CI_Controller {
   }
 
   public function logout(){
-    session_start();
     session_destroy();
     redirect(site_url("/user/login")); //轉回登入頁
   }

@@ -10,62 +10,117 @@ class Text extends CI_Controller {
     $this->load->model("TextModel");
 
     $user = $this->UserModel->getUserByAccount($author);
-    if($user == null){
-      show_404("Author not found !");
-    }
-
     $results = $this->TextModel->getTextByUserID($user->UserID);
 
     $this->load->view('author', Array(
         "pageTitle" => $user->Account." POST",
         "results" => $results,
-        "user" => $user,
+        "user" => $user
       )
     );
   }
 
   public function post(){
-    $this->load->view('post');
-  }
+    $this->load->model("TextModel");
 
-  public function create(){
-    if(isset($_SESSION["user"])){
-      redirect(site_url("/user/login"));
-      return true;
-    }
+    $results = $this->TextModel->getAllText();
 
-    $this->load->view('create', Array(
-      "pageTitle" => "POST"
-    )); 
+    $this->load->view('post', Array(
+        "pageTitle" => "POST",
+        "results" => $results
+      )
+    );
   }
 
   public function posting(){
-    if (isset($_SESSION["user"])){
+    if (!isset($_SESSION["user"])){
       redirect(site_url("/user/login"));
       return true;
     }
 
     $title = trim($this->input->post("title"));
     $content= trim($this->input->post("content"));
+
+    $this->load->model("UserModel");
+    $this->load->model("TextModel");
+
+    $user = $this->UserModel->getUserByAccount($_SESSION["user"]->Account);
+    $results = $this->TextModel->getTextByUserID($user->UserID);
     
     if($title == "" || $content == ""){
-      $this->load->view('create',Array(
-        "pageTitle" => "POST",
-        "errorMessage" => "Title or Content shouldn't be empty,please check!",
+      $this->load->view('author',Array(
+        "errorMessage" => "標題內容不得空白！",
         "title" => $title,
-        "content" => $content
+        "content" => $content,
+        "results" => $results,
+        "user" => $user
       ));
       return false;
     }
 
-    $this->load->model("TextModel");
-    session_start();
-    $insertID = $this->TextModel->insert($_SESSION["user"]->UserID, $title, $content); 
-    redirect(site_url("text/author"));
+    $this->TextModel->insert($_SESSION["user"]->UserID, $title, $content); 
+
+    redirect(site_url("text/author/".$_SESSION["user"]->Account));
   }
 
-  public function edit(){
-    $this->load->view('edit');  
+  public function view($textID = null){
+    if (!isset($_SESSION["user"])){
+      redirect(site_url("/user/login"));
+      return true;
+    }
+
+    if($textID == null){
+      show_404("Post not found !");
+      return true;
+    }
+
+    $this->load->model("TextModel");
+    $this->load->model("CommentModel");
+
+    $post = $this->TextModel->get($textID); 
+    $comments = $this->CommentModel->get($textID);
+
+    if($post == null){
+      show_404("Post not found !");
+      return true;  
+    }
+
+    $this->load->view('view',Array(
+      "pageTitle" => $post->Title, 
+      "post" => $post,
+      "comments" => $comments
+    ));
+  }
+
+  public function commenting($textID = null){
+    if (!isset($_SESSION["user"])){
+      redirect(site_url("/user/login"));
+      return true;
+    }
+
+    $comment = trim($this->input->post("comment"));
+
+    $this->load->model("UserModel");
+    $this->load->model("TextModel");
+    $this->load->model("CommentModel");
+
+    $user = $this->UserModel->getUserByAccount($_SESSION["user"]->Account);
+    $post = $this->TextModel->get($textID);
+    $comments = $this->CommentModel->get($textID);
+    
+    if($comment == ""){
+      $this->load->view('view',Array(
+        "errorMessage" => "回復內容不得空白！",
+        "pageTitle" => $post->Title, 
+        "post" => $post,
+        "comments" => $comments
+      ));
+      return false;
+    }
+
+    $this->CommentModel->addComment($user->UserID, $textID, $comment);
+
+    redirect(site_url("text/view/".$post->TextID));
   }
 
 }

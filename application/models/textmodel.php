@@ -5,38 +5,45 @@ class TextModel extends CI_Model {
   }
 
   function insert($author, $title, $content){
-    $this->db->insert("article", Array(
+    $this->db->insert("text", Array(
       "Author" =>  $author,
       "Title" => $title,
-      "Content" => $content,
-      "Views" => 0,
-    ));     
-    return $this->db->insert_id() ;
+      "Content" => $content
+    ));
   }
 
   function getTextByUserID($userID){
-    $this->db->select("article.*,user.Account");
-    $this->db->from('article');
-    $this->db->join('user', 'article.author = user.userID', 'left');
+    $this->db->select("text.*, user.Account");
+    $this->db->from('text');
+    $this->db->join('user', 'text.author = user.userID', 'left');
     $this->db->where(Array("author" => $userID));
-    $this->db->order_by("ArticleID","desc");
+    $this->db->order_by("TextID","desc");
     $query = $this->db->get();
 
     return $query->result();
   }
 
-   function get($articleID){
-    //CI 裡面跨資料表結合的寫法
-    $this->db->select("article.*,user.account");
-    $this->db->from('article');
-    $this->db->join('user', 'article.author = user.userID', 'left');
-    $this->db->where(Array("articleID" => $articleID));
+  function getAllText(){
+    $this->db->select("text.*, user.Account");
+    $this->db->from('text');
+    $this->db->join('user', 'text.author = user.userID', 'left');
+    $this->db->order_by("TextID","desc");
+    $query = $this->db->get();
+
+    return $query->result();
+  }
+
+   function get($textID){
+    $this->db->select("text.*, user.Account");
+    $this->db->from('text');
+    $this->db->join('user', 'text.author = user.userID', 'left');
+    $this->db->where(Array("TextID" => $textID));
     $query = $this->db->get();
 
     if ($query->num_rows() <= 0){
-        return null; //無資料時回傳 null
+      return null; 
     }
 
-    return $query->row();  //回傳第一筆
+    return $query->row();
   }
 }
