@@ -19,10 +19,6 @@ class CommentModel extends CI_Model {
     $this->db->where(Array("Text" => $textID));
     $query = $this->db->get();
 
-    if ($query->num_rows() <= 0){
-      return null; 
-    }
-
     return $query->result();
   }
 }
